@@ -48,11 +48,12 @@ const startChat = async (req: Request, res: Response) => {
   const msg = "Yes. Lets start the mock interview.";
 
   const result = await chat.sendMessage(msg);
+//   console.log(result);
   const response = await result.response;
   const text = response.text();
   console.log(text);
 
-  res.send(text);
+  res.send(result);
 };
 
 export { getResponseFromGeminAI, startChat };

@@ -1,8 +1,11 @@
 import express from 'express';
 const app = express();
-import chatRouteHandler from './routes/chat.routes';
+import cors from 'cors';
+import messageRouteHandler from './routes/message.routes';
 
-app.use('/chat', chatRouteHandler);
+app.use(cors());
+
+app.use('/message', messageRouteHandler);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
