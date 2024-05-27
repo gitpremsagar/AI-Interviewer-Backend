@@ -4,6 +4,7 @@ import cors from 'cors';
 import messageRouteHandler from './routes/message.routes';
 
 app.use(cors());
+app.use(express.json());
 
 app.use('/message', messageRouteHandler);
 

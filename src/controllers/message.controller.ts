@@ -24,36 +24,23 @@ const getResponseFromGeminAI = async (req: Request, res: Response) => {
 };
 
 const startChat = async (req: Request, res: Response) => {
-  const history = [
-    {
-      role: "user",
-      parts: [
-        {
-          text: "Act as an interviewer and take my interview for testing my JavaScript skill",
-        },
-      ],
-    },
-    {
-      role: "model",
-      parts: [{ text: "Ok. Are you ready for the first question?" }],
-    },
-  ];
+  const { history, message } = req.body;
+
   const chat = model.startChat({
     history: history,
     generationConfig: {
       maxOutputTokens: 100,
     },
-  });
+  });  
 
-  const msg = "Yes. Lets start the mock interview.";
-
-  const result = await chat.sendMessage(msg);
-//   console.log(result);
+  const result = await chat.sendMessage(message);
+  // console.log(result);
   const response = await result.response;
   const text = response.text();
-  console.log(text);
+  // console.log(text);
 
-  res.send(result);
+  res.send(text);
+  return;
 };
 
 export { getResponseFromGeminAI, startChat };

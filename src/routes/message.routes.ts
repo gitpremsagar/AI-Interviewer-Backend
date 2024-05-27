@@ -5,6 +5,6 @@ import { getResponseFromGeminAI, startChat } from '../controllers/message.contro
 
 // router.post('/prompt', getResponseFromGeminAI);
 
-router.get('/', startChat);
+router.post('/', startChat);
 
 export default router;
