@@ -1,25 +1,15 @@
-import { PrismaClient } from '@prisma/client'
+import { Router } from "express";
+import { signUpUser, loginUser } from "../controllers/user.controllers";
+import { validateSignUpForm } from "../middlewares/user.middlewares";
 
-const prisma = new PrismaClient()
+const router = Router();
 
-async function main() {
-    const newUser = await prisma.user.create({
-      data: {
-        firstName: 'Alice',
-        lastName: 'Smith',
-        email: 'alice@gmail.com',
-        password: 'password',
-        },
-    })
-    const allUsers = await prisma.user.findMany()
-    console.log(allUsers)
-  }
+router.get("/", (req, res) => {
+  res.send("Hello World!");
+});
 
-main()
-  .catch(async (e) => {
-    console.error(e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
-  })
+router.post("/", validateSignUpForm, signUpUser);
+
+router.post("/login", loginUser);
+
+export default router;
