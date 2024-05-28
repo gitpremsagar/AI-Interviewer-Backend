@@ -1,15 +1,24 @@
 import { Router } from "express";
-import { signUpUser, loginUser } from "../controllers/user.controllers";
-import { validateSignUpForm } from "../middlewares/user.middlewares";
+import {
+  signUpUser,
+  loginUser,
+  getUserbyUserId,
+  getAllUsers,
+} from "../controllers/user.controllers";
+import {
+  validateSignUpForm,
+  validateLoginForm,
+} from "../middlewares/user.middlewares";
+import verifyToken from "./../middlewares/auth";
 
 const router = Router();
 
-router.get("/", (req, res) => {
-  res.send("Hello World!");
-});
-
 router.post("/", validateSignUpForm, signUpUser);
 
-router.post("/login", loginUser);
+router.post("/login", validateLoginForm, loginUser);
+
+router.get("/:userId", getUserbyUserId);
+
+router.get("/", verifyToken, getAllUsers);
 
 export default router;
