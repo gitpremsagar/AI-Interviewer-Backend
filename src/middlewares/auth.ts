@@ -14,17 +14,28 @@ declare global {
 }
 
 const verifyToken = (req: Request, res: Response, next: NextFunction) => {
-  const bearer = req.header("Authorization");
-  if (!bearer) return res.status(401).send("Access Denied");
+  // const bearer = req.header("Authorization");
+  // if (!bearer) return res.status(401).send("Access Denied");
 
-  const token = bearer.split(" ")[1];
+  // const token = bearer.split(" ")[1];
+
+  const token = req.cookies.token;
 
   try {
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY!);
     req.user = decodedToken as DecodedUserToken;
     next();
   } catch (err) {
-    res.status(400).send("Invalid Token");
+    if (err instanceof jwt.TokenExpiredError) {
+      console.log("Access Token Expired");
+      return res.status(401).send("Access Token Expired");
+    } else if (err instanceof jwt.JsonWebTokenError) {
+      console.log("Invalid Access Token");
+      return res.status(400).send("Invalid Access Token");
+    } else {
+      console.error(err);
+      return res.status(400).send("Token Validation Failed");
+    }
   }
 };
 

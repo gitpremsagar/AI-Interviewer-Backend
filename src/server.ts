@@ -1,6 +1,7 @@
 import express from "express";
 const app = express();
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 // route handlers
 import messageRouteHandler from "./routes/message.routes";
@@ -8,6 +9,7 @@ import userRouteHandler from "./routes/user.routes";
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 app.use("/message", messageRouteHandler);
 app.use("/user", userRouteHandler);
