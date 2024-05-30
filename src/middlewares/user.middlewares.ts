@@ -45,6 +45,7 @@ const validateSignUpForm = (
     });
     next();
   } catch (error: any) {
+    console.log(error.errors);
     res.status(400).json({ message: error.errors });
   }
 };
@@ -61,7 +62,8 @@ const validateLoginForm = (req: Request, res: Response, next: NextFunction) => {
     loginFormSchema.parse({ email, password });
     next();
   } catch (error: any) {
-    res.status(400).json({ message: error.errors });
+    console.log(error.errors);
+    res.status(400).json({ message: "invalid email or password" });
   }
 };
 

@@ -7,7 +7,13 @@ import cookieParser from "cookie-parser";
 import messageRouteHandler from "./routes/message.routes";
 import userRouteHandler from "./routes/user.routes";
 
-app.use(cors());
+// Set up CORS
+app.use(
+  cors({
+    origin: process.env.FRONTEND_DOMAIN,
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 

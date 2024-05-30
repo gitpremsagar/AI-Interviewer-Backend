@@ -18,7 +18,7 @@ const signUpUser = async (req: Request, res: Response) => {
     });
 
     if (user) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(409).json({ message: "User already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(
@@ -35,7 +35,7 @@ const signUpUser = async (req: Request, res: Response) => {
       },
     });
 
-    res.json(newUser);
+    res.status(201).json({ message: "User created successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
@@ -53,13 +53,13 @@ const loginUser = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "invalid email or password" });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      return res.status(400).json({ message: "Invalid password" });
+      return res.status(400).json({ message: "invalid email or password" });
     }
 
     // create access token
@@ -103,19 +103,46 @@ const loginUser = async (req: Request, res: Response) => {
     res
       .cookie("token", token, {
         httpOnly: true,
-        secure: process.env.HTTPS_ENABLED === "true" ? true : false,
-        sameSite: "strict",
+        secure: true,
+        sameSite: "none",
+        domain: process.env.BACKEND_DOMAIN,
       })
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        secure: process.env.HTTPS_ENABLED === "true" ? true : false,
-        sameSite: "strict",
+        secure: true,
+        sameSite: "none",
+        domain: process.env.BACKEND_DOMAIN,
       })
       .json({ message: "Login successful" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
   }
+};
+
+const logoutUser = async (req: Request, res: Response) => {
+  const refreshToken: string = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    return res.status(200).json({ message: "Already logged out" });
+  }
+
+  const decodedRefreshToken = jwt.verify(
+    refreshToken,
+    process.env.JWT_REFRESH_SECRET_KEY!
+  ) as jwt.JwtPayload;
+
+  // remove the refresh token from the database
+  await prisma.auth.delete({
+    where: {
+      userId: decodedRefreshToken.userId,
+    },
+  });
+
+  res
+    .clearCookie("token")
+    .clearCookie("refreshToken")
+    .json({ message: "Logout successful" });
 };
 
 const getUserbyUserId = async (req: Request, res: Response) => {
@@ -167,7 +194,7 @@ const refreshAccessToken = async (req: Request, res: Response) => {
   const refreshToken: string = req.cookies.refreshToken;
 
   if (!refreshToken) {
-    return res.status(401).json({ message: "Access token not found" });
+    return res.status(403).json({ message: "Refresh token not found" });
   }
 
   // verify the refresh token
@@ -239,35 +266,16 @@ const refreshAccessToken = async (req: Request, res: Response) => {
   res
     .cookie("token", token, {
       httpOnly: true,
-      secure: process.env.HTTPS_ENABLED === "true" ? true : false,
-      sameSite: "strict",
+      secure: true,
+      sameSite: "none",
+      domain: process.env.BACKEND_DOMAIN,
     })
     .json({ message: "Token refreshed" });
 };
 
-const logoutUser = async (req: Request, res: Response) => {
-  const refreshToken: string = req.cookies.refreshToken;
-
-  if (!refreshToken) {
-    return res.status(200).json({ message: "Already logged out" });
-  }
-
-  const decodedRefreshToken = jwt.verify(
-    refreshToken,
-    process.env.JWT_REFRESH_SECRET_KEY!
-  ) as jwt.JwtPayload;
-
-  // remove the refresh token from the database
-  await prisma.auth.delete({
-    where: {
-      userId: decodedRefreshToken.userId,
-    },
-  });
-
-  res
-    .clearCookie("token")
-    .clearCookie("refreshToken")
-    .json({ message: "Logout successful" });
+const decodeAccessToken = async (req: Request, res: Response) => {
+  // console.log("decoded token = ", req.user);
+  res.json(req.user); //req.user has decoded value and is set by the verifyToken middleware
 };
 
 export {
@@ -277,4 +285,5 @@ export {
   getUserbyUserId,
   getAllUsers,
   refreshAccessToken,
+  decodeAccessToken,
 };
