@@ -8,7 +8,7 @@ import { DecodedUserToken } from "../types/user.type";
 declare global {
   namespace Express {
     interface Request {
-      user?: jwt.JwtPayload;
+      user: DecodedUserToken;
     }
   }
 }
@@ -26,7 +26,7 @@ const verifyToken = (req: Request, res: Response, next: NextFunction) => {
     next();
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError) {
-      console.log("Access Token Expired");
+      // console.log("Access Token Expired");
       return res.status(401).send("Access Token Expired");
     } else if (err instanceof jwt.JsonWebTokenError) {
       console.log("Invalid Access Token");

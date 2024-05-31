@@ -1,7 +1,10 @@
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
-import { Request, Response } from 'express';
-import { GoogleGenerativeAI }from "@google/generative-ai";
+import { Request, Response } from "express";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { PrismaClient, Conversation } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 // Access your API key as an environment variable (see "Set up your API key" above)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
@@ -9,38 +12,83 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 // The Gemini 1.5 models are versatile and work with most use cases
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-const getResponseFromGeminAI = async (req: Request, res: Response) => {
-  const prompt = req.body.prompt;
+const startChat = async (req: Request, res: Response) => {
+  const { history, message } = req.body;
+  let { conversationId } = req.body;
 
+  // insert new conversation in db if its a new conversation
+  if (conversationId === "newConversation") {
+    try {
+      const insertedConversation = await prisma.conversation.create({
+        data: {
+          user: {
+            connect: {
+              userId: req.user.userId,
+            },
+          },
+        },
+      });
+      conversationId = insertedConversation.conversationId;
+      // console.log("Conversation saved on db - ", insertedConversation);
+    } catch (error) {
+      console.error("could not save conversation on db - ", error);
+    }
+  }
+
+  // save message on db
   try {
-    const result = await model.generateContent(prompt);
+    const addedMessage = await prisma.message.create({
+      data: {
+        message: message,
+        conversationId,
+        sender: "user",
+      },
+    });
+    // console.log("Message saved on db - ", addedMessage);
+  } catch (error) {
+    console.error("could not save msg on db - ", error);
+  }
+
+  // send message to Gemini
+  try {
+    const chat = model.startChat({
+      history: history,
+      generationConfig: {
+        maxOutputTokens: 1000,
+      },
+    });
+
+    const result = await chat.sendMessage(message);
+    // console.log(result);
     const response = await result.response;
     const text = response.text();
-    res.send(text);
+    // console.log(text);
+
+    // save Gemini's response on db
+    try {
+      const addedMessage = await prisma.message.create({
+        data: {
+          message: text,
+          conversationId: conversationId,
+          sender: "model",
+        },
+      });
+      // console.log("Gemini's response saved on db - ", addedMessage);
+    } catch (error) {
+      console.error("could not save Gemini's response on db - ", error);
+      return res
+        .status(500)
+        .json({ error: "could not save Gemini's response on db" });
+    }
+
+    // send Gemini's response to client with conversationId
+    res.json({
+      geminiResponse: text,
+      conversationId,
+    });
   } catch (error) {
-    console.log(error);
-    res.status(500).send("Could not generate response.");
+    res.status(500).json({ error: "GoogleGenerativeAI Error" });
   }
 };
 
-const startChat = async (req: Request, res: Response) => {
-  const { history, message } = req.body;
-
-  const chat = model.startChat({
-    history: history,
-    generationConfig: {
-      maxOutputTokens: 100,
-    },
-  });  
-
-  const result = await chat.sendMessage(message);
-  // console.log(result);
-  const response = await result.response;
-  const text = response.text();
-  // console.log(text);
-
-  res.send(text);
-  return;
-};
-
-export { getResponseFromGeminAI, startChat };
+export { startChat };

@@ -127,15 +127,10 @@ const logoutUser = async (req: Request, res: Response) => {
     return res.status(200).json({ message: "Already logged out" });
   }
 
-  const decodedRefreshToken = jwt.verify(
-    refreshToken,
-    process.env.JWT_REFRESH_SECRET_KEY!
-  ) as jwt.JwtPayload;
-
   // remove the refresh token from the database
-  await prisma.auth.delete({
+  await prisma.auth.deleteMany({
     where: {
-      userId: decodedRefreshToken.userId,
+      refreshToken: refreshToken,
     },
   });
 

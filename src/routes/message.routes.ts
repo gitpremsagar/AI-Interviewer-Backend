@@ -1,10 +1,10 @@
-import express from 'express';
+import express from "express";
+import verifyToken from "../middlewares/auth";
+
 const router = express.Router();
 
-import { getResponseFromGeminAI, startChat } from '../controllers/message.controller';
+import { startChat } from "../controllers/message.controller";
 
-// router.post('/prompt', getResponseFromGeminAI);
-
-router.post('/', startChat);
+router.post("/", verifyToken, startChat);
 
 export default router;
