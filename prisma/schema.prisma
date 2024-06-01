@@ -53,12 +53,41 @@ model Message {
   conversation   Conversation @relation(fields: [conversationId], references: [conversationId])
 }
 
-model Jobs {
-  id             String   @id @default(uuid()) @map("_id")
+// model Job {
+//   jobId          String   @id @default(auto()) @map("_id") @db.ObjectId
+//   jobTitle       String
+//   jobDescription String
+//   company        String
+//   location       String
+//   createdAt      DateTime @default(now())
+//   updatedAt      DateTime @updatedAt
+// }
+
+// model Skill {
+//   skillId   String   @id @default(auto()) @map("_id") @db.ObjectId
+//   skillName String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
+model Job {
+  jobId          String   @id @default(uuid()) @map("_id") @db.ObjectId
   jobTitle       String
   jobDescription String
   company        String
   location       String
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  skillIDs       String[] @db.ObjectId
+  skills         Skill[]  @relation(fields: [skillIDs], references: [skillId])
+}
+
+model Skill {
+  skillId          String   @id @default(uuid()) @map("_id") @db.ObjectId
+  skillName        String
+  skillDescription String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  jobIDs           String[] @db.ObjectId
+  jobs             Job[]    @relation(fields: [jobIDs], references: [jobId])
 }
