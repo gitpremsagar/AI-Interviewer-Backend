@@ -18,9 +18,13 @@ const startChat = async (req: Request, res: Response) => {
 
   // insert new conversation in db if its a new conversation
   if (conversationId === "newConversation") {
+    //TODO:generate a new conversationtitle if its a new conversation
+    const conversationTitle = "Conversation Title";
+
     try {
       const insertedConversation = await prisma.conversation.create({
         data: {
+          conversationTitle,
           user: {
             connect: {
               userId: req.user.userId,
@@ -32,6 +36,21 @@ const startChat = async (req: Request, res: Response) => {
       // console.log("Conversation saved on db - ", insertedConversation);
     } catch (error) {
       console.error("could not save conversation on db - ", error);
+    }
+  } else {
+    // check if conversationId belongs to the user
+    try {
+      const conversation = await prisma.conversation.findUnique({
+        where: {
+          conversationId,
+        },
+      });
+
+      if (!conversation || conversation.userId !== req.user.userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+    } catch (error) {
+      console.error("could not find conversation on db - ", error);
     }
   }
 

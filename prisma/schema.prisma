@@ -35,12 +35,13 @@ model Auth {
 }
 
 model Conversation {
-  conversationId String    @id @default(uuid()) @map("_id")
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  userId         String
-  user           User      @relation(fields: [userId], references: [userId])
-  messages       Message[]
+  conversationId    String    @id @default(uuid()) @map("_id")
+  conversationTitle String
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  userId            String
+  user              User      @relation(fields: [userId], references: [userId])
+  messages          Message[]
 }
 
 model Message {
