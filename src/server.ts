@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import messageRouteHandler from "./routes/message.routes";
 import userRouteHandler from "./routes/user.routes";
 import conversationRouteHandler from "./routes/conversation.routes";
+import jobRouteHandler from "./routes/job.routes";
 
 // Set up CORS
 app.use(
@@ -21,6 +22,7 @@ app.use(cookieParser());
 app.use("/message", messageRouteHandler);
 app.use("/user", userRouteHandler);
 app.use("/conversation", conversationRouteHandler);
+app.use("/job", jobRouteHandler);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
