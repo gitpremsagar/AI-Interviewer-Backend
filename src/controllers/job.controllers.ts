@@ -4,18 +4,20 @@ import { Request, Response } from "express";
 const prisma = new PrismaClient();
 
 const createJob = async (req: Request, res: Response) => {
-  const { jobTitle, jobDescription, skills } = req.body;
+  const { jobTitle, jobDescription, skillIDs } = req.body;
 
   try {
     const newJob = await prisma.job.create({
       data: {
         jobTitle,
         jobDescription,
-        skills,
+        skills: {
+          connect: skillIDs.map((skillId: string) => ({ skillId })),
+        },
       },
     });
 
-    console.log("Job saved on db - ", newJob);
+    // console.log("Job saved on db - ", newJob);
     res.json(newJob);
   } catch (error) {
     console.error("could not save job on db - ", error);
