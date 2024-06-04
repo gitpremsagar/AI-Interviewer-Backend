@@ -8,11 +8,13 @@ import {
   getJobs,
   updateJob,
   deleteJob,
+  createManyJobs,
 } from "../controllers/job.controllers";
 
 router.post("/", verifyToken, createJob);
 router.get("/", getJobs);
 router.put("/:jobId", verifyToken, updateJob);
 router.delete("/:jobId", verifyToken, deleteJob);
+router.post("/many", verifyToken, createManyJobs);
 
 export default router;

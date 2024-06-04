@@ -39,9 +39,11 @@ model Conversation {
   conversationTitle String
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+  jobId             String
   userId            String
   user              User      @relation(fields: [userId], references: [userId])
   messages          Message[]
+  job               Job       @relation(fields: [jobId], references: [jobId])
 }
 
 model Message {
@@ -54,15 +56,16 @@ model Message {
 }
 
 model Job {
-  jobId          String   @id @default(cuid()) @map("_id")
+  jobId          String         @id @default(cuid()) @map("_id")
   jobTitle       String
   jobDescription String
   company        String?
   location       String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  conversations  Conversation[]
   skillIDs       String[]
-  skills         Skill[]  @relation(fields: [skillIDs], references: [skillId])
+  skills         Skill[]        @relation(fields: [skillIDs], references: [skillId])
 }
 
 model Skill {

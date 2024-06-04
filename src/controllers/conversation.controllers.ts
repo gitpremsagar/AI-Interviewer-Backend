@@ -9,6 +9,9 @@ const getConversations = async (req: Request, res: Response) => {
       where: {
         userId: req.user.userId,
       },
+      include: {
+        job: true,
+      },
     });
     res.json(conversations);
   } catch (error) {

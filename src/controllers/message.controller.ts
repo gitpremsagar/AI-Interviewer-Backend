@@ -13,7 +13,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 const startChat = async (req: Request, res: Response) => {
-  const { history, message } = req.body;
+  const { history, message, jobId } = req.body;
   let { conversationId } = req.body;
 
   // insert new conversation in db if its a new conversation
@@ -28,6 +28,11 @@ const startChat = async (req: Request, res: Response) => {
           user: {
             connect: {
               userId: req.user.userId,
+            },
+          },
+          job: {
+            connect: {
+              jobId,
             },
           },
         },
@@ -78,7 +83,7 @@ const startChat = async (req: Request, res: Response) => {
     });
 
     const result = await chat.sendMessage(message);
-    // console.log(result);
+    // console.log("gemini result = ", result);
     const response = await result.response;
     const text = response.text();
     // console.log(text);
@@ -106,6 +111,7 @@ const startChat = async (req: Request, res: Response) => {
       conversationId,
     });
   } catch (error) {
+    console.error("error while responding to chat message - ", error);
     res.status(500).json({ error: "GoogleGenerativeAI Error" });
   }
 };
