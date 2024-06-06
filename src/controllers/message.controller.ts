@@ -2,7 +2,8 @@ import dotenv from "dotenv";
 dotenv.config();
 import { Request, Response } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { PrismaClient, Conversation } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import { History } from "../types/history.type";
 
 const prisma = new PrismaClient();
 
@@ -13,8 +14,34 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 const startChat = async (req: Request, res: Response) => {
-  const { history, message, jobId } = req.body;
-  let { conversationId } = req.body;
+  const { message, jobId, jobTitle, jobDescription } = req.body;
+  let { conversationId, history } = req.body;
+  const firstChatHistory: History = [
+    {
+      role: "user",
+      parts: [
+        {
+          text: `Act as an interviewer and take my interview. I'm going to apply for the job with following details:
+          jobTitle: ${jobTitle}
+          jobDescription: ${jobDescription}`,
+        },
+      ],
+    },
+    {
+      role: "model",
+      parts: [{ text: "Ok. Are you ready for the first question?" }],
+    },
+    {
+      role: "user",
+      parts: [{ text: "Yes. I'm Ready." }],
+    },
+    {
+      role: "model",
+      parts: [{ text: "First of all tell me your name." }],
+    },
+  ];
+
+  history = [...firstChatHistory, ...history];
 
   // insert new conversation in db if its a new conversation
   if (conversationId === "newConversation") {
