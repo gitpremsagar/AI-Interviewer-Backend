@@ -143,4 +143,22 @@ const startChat = async (req: Request, res: Response) => {
   }
 };
 
-export { startChat };
+const getMessagesByConversationId = async (req: Request, res: Response) => {
+  const { conversationId } = req.params;
+  // console.log("conversationId = ", conversationId);
+  try {
+    const messages = await prisma.message.findMany({
+      where: {
+        conversationId: conversationId as string,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+    res.json(messages);
+  } catch (error) {
+    console.error("could not get messages from db - ", error);
+    res.status(500).json({ error: "could not get messages from db" });
+  }
+};
+export { startChat, getMessagesByConversationId };
