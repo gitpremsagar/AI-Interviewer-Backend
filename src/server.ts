@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 const app = express();
 import cors from "cors";
@@ -32,6 +34,8 @@ app.use("/skill", skillRouteHandler);
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
+
+console.log("BACKEND_DOMAIN = ", process.env.BACKEND_DOMAIN);
 
 const PORT = process.env.PORT || 3500;
 app.listen(PORT, () => {
