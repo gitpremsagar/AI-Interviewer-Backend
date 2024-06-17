@@ -20,6 +20,9 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
+// define public folder
+app.use(express.static("public"));
+
 app.use("/message", messageRouteHandler);
 app.use("/user", userRouteHandler);
 app.use("/conversation", conversationRouteHandler);
