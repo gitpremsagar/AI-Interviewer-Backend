@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "buildCommand": "npx prisma generate && npx tsc",
   "builds": [
     {
       "src": "dist/server.js",
