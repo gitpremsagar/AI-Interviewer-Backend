@@ -36,6 +36,7 @@ app.get("/", (req, res) => {
 });
 
 console.log("BACKEND_DOMAIN = ", process.env.BACKEND_DOMAIN);
+console.log("FRONTEND_DOMAIN = ", process.env.FRONTEND_DOMAIN);
 
 const PORT = process.env.PORT || 3500;
 app.listen(PORT, () => {
